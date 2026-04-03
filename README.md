@@ -27,35 +27,6 @@ Businesses struggle to:
 ## 🧠 Solution Approach
 
 We built a system that:
-# 🚀 Customer Churn Prediction System
-
-### 📊 Machine Learning + Explainable AI + Web Application
-
----
-
-## 🌟 Project Overview
-
-This project is a **full-stack Customer Churn Prediction System** that uses **Machine Learning and Explainable AI (XAI)** to predict whether a customer is likely to leave a service.
-
-It not only predicts churn but also **explains the reason behind predictions** and provides **actionable business insights**.
-
----
-
-## 🎯 Problem Statement
-
-Businesses struggle to:
-
-- ❌ Identify customers likely to churn  
-- ❌ Understand *why* customers leave  
-- ❌ Take proactive retention actions  
-
-👉 This project solves these challenges using **data-driven prediction + explainability**
-
----
-
-## 🧠 Solution Approach
-
-We built a system that:
 Customer Data → ML Model → Prediction → SHAP Explanation → Dashboard
 
 
