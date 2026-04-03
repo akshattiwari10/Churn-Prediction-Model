@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Churn Analysis Result</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
+
+</head>
+
+<body>
+
+<div id="particles-js"></div>
+
+<div class="container">
+
+<h1>Customer Churn Analysis</h1>
+
+<p id="probability"></p>
+<p id="prediction"></p>
+<p id="risk"></p>
+
+<h3>Churn Risk Gauge</h3>
+<canvas id="riskGauge"></canvas>
+
+<h3>Churn Drivers</h3>
+<ul id="drivers"></ul>
+
+<h3>Loyalty Factors</h3>
+<ul id="loyalty"></ul>
+
+<h3>Feature Impact Chart</h3>
+<canvas id="impactChart"></canvas>
+
+<h3>Recommended Actions</h3>
+<ul id="recommendations"></ul>
+
+<button onclick="window.location='index.html'">
+Analyze Another Customer
+</button>
+
+</div>
+
+<script src="particles.js"></script>
+<script src="script.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Churn Prediction System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+            padding: 60px 80px;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            opacity: 1;
+        }
+
+        /* Navigation */
+        .nav-controls {
+            position: fixed;
+            bottom: 30px;
+            right: 40px;
+            z-index: 1000;
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: rgba(0, 212, 255, 0.2);
+            border: 2px solid #00d4ff;
+            color: #00d4ff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: #00d4ff;
+            color: #0a0a0a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 30px;
+            left: 40px;
+            color: #00d4ff;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff 0%, #00d4ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        h2 {
+            font-size: 2.8rem;
+            color: #00d4ff;
+            margin-bottom: 40px;
+            font-weight: 600;
+            position: relative;
+            display: inline-block;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #00d4ff, #0099cc);
+            border-radius: 2px;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            color: #00d4ff;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        p, li {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #e0e0e0;
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        li {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 15px;
+        }
+
+        li::before {
+            content: '▹';
+            position: absolute;
+            left: 0;
+            color: #00d4ff;
+            font-weight: bold;
+        }
+
+        /* Layout Components */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            flex: 1;
+        }
+
+        .content-single {
+            max-width: 900px;
+        }
+
+        .highlight {
+            color: #00d4ff;
+            font-weight: 600;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: #00d4ff;
+        }
+
+        /* Visual Elements */
+        .icon-circle {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .diagram {
+            background: rgba(0, 212, 255, 0.1);
+            border: 2px dashed #00d4ff;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .flow-step {
+            background: rgba(0, 212, 255, 0.15);
+            border: 2px solid #00d4ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px;
+            display: inline-block;
+            min-width: 150px;
+            font-weight: 600;
+        }
+
+        .arrow {
+            color: #00d4ff;
+            font-size: 2rem;
+            margin: 0 20px;
+        }
+
+        .metric-box {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(0, 153, 204, 0.1) 100%);
+            border-left: 4px solid #00d4ff;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        /* Specific Slide Styles */
+        .title-slide {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .title-slide h1 {
+            font-size: 4rem;
+            margin-bottom: 30px;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: #888;
+            margin-bottom: 50px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .author-info {
+            margin-top: 60px;
+            padding: 30px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .problem-card {
+            background: rgba(255, 0, 85, 0.1);
+            border: 1px solid rgba(255, 0, 85, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .problem-card .icon-circle {
+            background: linear-gradient(135deg, #ff0055 0%, #cc0044 100%);
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 30px rgba(255, 0, 85, 0.3);
+        }
+
+        .tech-stack {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 40px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .tech-item {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid #00d4ff;
+            border-radius: 10px;
+            padding: 15px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .tech-item:hover {
+            background: #00d4ff;
+            color: #0a0a0a;
+            transform: scale(1.05);
+        }
+
+        .shap-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .feature-bar {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .feature-name {
+            width: 150px;
+            text-align: right;
+            margin-right: 20px;
+            font-size: 0.9rem;
+        }
+
+        .bar-container {
+            flex: 1;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar {
+            height: 100%;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .bar.positive {
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+            margin-left: 50%;
+        }
+
+        .bar.negative {
+            background: linear-gradient(90deg, #ff0055, #ff5500);
+            margin-right: 50%;
+            justify-content: flex-start;
+            padding-left: 10px;
+        }
+
+        .dashboard-preview {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .dash-widget {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dash-widget::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+        }
+
+        .future-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .future-item {
+            display: flex;
+            align-items: start;
+            gap: 20px;
+        }
+
+        .future-icon {
+            font-size: 2.5rem;
+            color: #00d4ff;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .slide {
+                padding: 40px;
+            }
+            h1 { font-size: 2.5rem; }
+            h2 { font-size: 2rem; }
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            .problem-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation">
+        <!-- Slide 1: Title -->
+        <div class="slide active title-slide">
+            <div class="animate-in">
+                <div class="subtitle">Machine Learning Project</div>
+                <h1>Customer Churn Prediction System</h1>
+                <p style="font-size: 1.3rem; color: #00d4ff; margin-bottom: 20px;">Using Machine Learning and Explainable AI</p>
+                <div class="author-info">
+                    <p style="margin: 5px 0;"><strong>Academic Presentation</strong></p>
+                    <p style="color: #888; margin: 5px 0;">2026</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Introduction -->
+        <div class="slide">
+            <h2>Introduction</h2>
+            <div class="content-grid">
+                <div class="content-single">
+                    <div class="card animate-in">
+                        <h3>What is Customer Churn?</h3>
+                        <p>Churn refers to when customers <span class="highlight">stop doing business</span> with a company or service. Predicting churn helps businesses <span class="highlight">retain valuable customers</span> and reduce revenue loss.</p>
+                    </div>
+                    <ul style="margin-top: 30px;" class="animate-in delay-1">
+                        <li>Critical for <span class="highlight">subscription-based</span> business models</li>
+                        <li>Acquiring new customers costs <span class="highlight">5-25x more</span> than retaining existing ones</li>
+                        <li>Early prediction enables <span class="highlight">proactive retention</span> strategies</li>
+                    </ul>
+                </div>
+                <div class="animate-in delay-2" style="text-align: center;">
+                    <div class="diagram">
+                        <div style="font-size: 4rem; margin-bottom: 20px;">📊</div>
+                        <p style="font-size: 1.5rem; font-weight: 600; color: #00d4ff;">Business Impact</p>
+                        <p style="margin-top: 15px;">Reducing churn by 5% can increase profits by 25-95%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Problem Statement -->
+        <div class="slide">
+            <h2>Problem Statement</h2>
+            <div class="problem-grid">
+                <div class="problem-card animate-in">
+                    <div class="icon-circle">⚠️</div>
+                    <h3>High Churn Rates</h3>
+                    <p>Industries like telecom experience <span class="highlight">15-25% annual churn</span>, significantly impacting revenue</p>
+                </div>
+                <div class="problem-card animate-in delay-1">
+                    <div class="icon-circle">🔍</div>
+                    <h3>Black Box Models</h3>
+                    <p>Traditional ML models lack <span class="highlight">interpretability</span>, making business decisions difficult</p>
+                </div>
+                <div class="problem-card animate-in delay-2">
+                    <div class="icon-circle">⏱️</div>
+                    <h3>Reactive Approach</h3>
+                    <p>Companies often act <span class="highlight">after</span> customers leave, missing prevention opportunities</p>
+                </div>
+            </div>
+            <div class="metric-box animate-in delay-3" style="margin-top: 40px;">
+                <h3>Objective</h3>
+                <p>Develop an <span class="highlight">accurate prediction system</span> with <span class="highlight">transparent explanations</span> and an <span class="highlight">interactive dashboard</span> for real-time decision making</p>
+            </div>
+        </div>
+
+        <!-- Slide 4: System Overview -->
+        <div class="slide">
+            <h2>System Architecture</h2>
+            <div style="text-align: center; margin-top: 30px;">
+                <div class="animate-in">
+                    <div class="flow-step">Data Collection</div>
+                    <span class="arrow">→</span>
+                    <div class="flow-step">Preprocessing</div>
+                    <span class="arrow">→</span>
+                    <div class="flow-step">Feature Engineering</div>
+                </div>
+                <div style="margin: 20px 0; color: #00d4ff; font-size: 2rem;">↓</div>
+                <div class="animate-in delay-1">
+                    <div class="flow-step" style="background: rgba(0, 212, 255, 0.3); border-width: 3px;">ML Model Training</div>
+                    <span class="arrow">→</span>
+                    <div class="flow-step" style="background: rgba(0, 212, 255, 0.3); border-width: 3px;">SHAP Explainability</div>
+                </div>
+                <div style="margin: 20px 0; color: #00d4ff; font-size: 2rem;">↓</div>
+                <div class="animate-in delay-2">
+                    <div class="flow-step">Web Dashboard</div>
+                    <span class="arrow">→</span>
+                    <div class="flow-step">Real-time Predictions</div>
+                </div>
+            </div>
+            <div class="tech-stack animate-in delay-3">
+                <div class="tech-item">Python</div>
+                <div class="tech-item">Scikit-learn</div>
+                <div class="tech-item">XGBoost</div>
+                <div class="tech-item">SHAP</div>
+                <div class="tech-item">Flask/Streamlit</div>
+                <div class="tech-item">Pandas</div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Dataset and Model -->
+        <div class="slide">
+            <h2>Dataset & Model Performance</h2>
+            <div class="content-grid">
+                <div class="animate-in">
+                    <h3>Dataset Characteristics</h3>
+                    <ul>
+                        <li><span class="highlight">7,043</span> customer records</li>
+                        <li><span class="highlight">21 features</span> including demographics, services, and billing</li>
+                        <li>Target: <span class="highlight">Churn Yes/No</span></li>
+                        <li>Class distribution handled with <span class="highlight">SMOTE</span></li>
+                    </ul>
+                    <div class="card" style="margin-top: 30px;">
+                        <h3>Key Features</h3>
+                        <p>Tenure • Monthly Charges • Contract Type • Internet Service • Payment Method • Support Tickets</p>
+                    </div>
+                </div>
+                <div class="animate-in delay-1">
+                    <h3>Model Results</h3>
+                    <div class="metric-box">
+                        <span style="font-size: 2rem; color: #00d4ff;">92%</span>
+                        <p>Accuracy</p>
+                    </div>
+                    <div class="metric-box">
+                        <span style="font-size: 2rem; color: #00d4ff;">0.89</span>
+                        <p>F1-Score</p>
+                    </div>
+                    <div class="metric-box">
+                        <span style="font-size: 2rem; color: #00d4ff;">0.94</span>
+                        <p>AUC-ROC</p>
+                    </div>
+                    <p style="margin-top: 20px; font-size: 1rem; color: #888;">Best Model: <span class="highlight">XGBoost Classifier</span> with hyperparameter tuning</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Explainable AI -->
+        <div class="slide">
+            <h2>Explainable AI (SHAP)</h2>
+            <div class="content-grid">
+                <div class="animate-in">
+                    <h3>Why SHAP?</h3>
+                    <ul>
+                        <li><span class="highlight">SHAP (SHapley Additive exPlanations)</span> provides consistent, locally accurate feature attributions</li>
+                        <li>Explains <span class="highlight">individual predictions</span> at the customer level</li>
+                        <li>Identifies <span class="highlight">global feature importance</span> across the dataset</li>
+                        <li>Enables <span class="highlight">business stakeholders</span> to trust and act on model outputs</li>
+                    </ul>
+                    <div class="card" style="margin-top: 30px;">
+                        <p style="font-style: italic; color: #00d4ff;">"This customer has 85% churn risk primarily due to month-to-month contract and high monthly charges"</p>
+                    </div>
+                </div>
+                <div class="animate-in delay-1">
+                    <h3>Feature Impact Analysis</h3>
+                    <div class="shap-visual">
+                        <div style="width: 100%;">
+                            <div class="feature-bar">
+                                <div class="feature-name">Contract</div>
+                                <div class="bar-container">
+                                    <div class="bar positive" style="width: 40%;">High</div>
+                                </div>
+                            </div>
+                            <div class="feature-bar">
+                                <div class="feature-name">Tenure</div>
+                                <div class="bar-container">
+                                    <div class="bar negative" style="width: 35%; margin-left: 15%;">Low</div>
+                                </div>
+                            </div>
+                            <div class="feature-bar">
+                                <div class="feature-name">MonthlyCharges</div>
+                                <div class="bar-container">
+                                    <div class="bar positive" style="width: 30%;">High</div>
+                                </div>
+                            </div>
+                            <div class="feature-bar">
+                                <div class="feature-name">TechSupport</div>
+                                <div class="bar-container">
+                                    <div class="bar negative" style="width: 25%; margin-left: 25%;">No</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="text-align: center; margin-top: 20px; font-size: 0.9rem; color: #888;">Blue = Reduces Churn Risk | Red = Increases Churn Risk</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Web Dashboard -->
+        <div class="slide">
+            <h2>Web Dashboard Features</h2>
+            <div class="dashboard-preview">
+                <div class="dash-widget animate-in">
+                    <h3>📈 Real-time Prediction</h3>
+                    <p>Input customer data and receive <span class="highlight">instant churn probability</span> with confidence intervals</p>
+                </div>
+                <div class="dash-widget animate-in delay-1">
+                    <h3>🔍 Explanation View</h3>
+                    <p>Interactive <span class="highlight">SHAP force plots</span> showing which factors drive each prediction</p>
+                </div>
+                <div class="dash-widget animate-in delay-2">
+                    <h3>📊 Analytics Panel</h3>
+                    <p>Visualize <span class="highlight">customer segments</span>, risk distributions, and historical trends</p>
+                </div>
+                <div class="dash-widget animate-in delay-3">
+                    <h3>⚡ Action Recommendations</h3>
+                    <p>AI-generated <span class="highlight">retention strategies</span> based on individual customer profiles</p>
+                </div>
+            </div>
+            <div class="metric-box animate-in" style="margin-top: 30px; text-align: center;">
+                <p><span class="highlight">Tech Stack:</span> React Frontend • Python Backend • RESTful API • Interactive D3.js Visualizations</p>
+            </div>
+        </div>
+
+        <!-- Slide 8: Conclusion -->
+        <div class="slide">
+            <h2>Conclusion & Future Work</h2>
+            <div class="future-grid">
+                <div class="animate-in">
+                    <h3>Key Achievements</h3>
+                    <ul>
+                        <li>Achieved <span class="highlight">92% accuracy</span> in churn prediction</li>
+                        <li>Implemented <span class="highlight">transparent AI</span> with SHAP explanations</li>
+                        <li>Built <span class="highlight">user-friendly dashboard</span> for business users</li>
+                        <li>Enabled <span class="highlight">data-driven retention</span> strategies</li>
+                    </ul>
+                </div>
+                <div class="animate-in delay-1">
+                    <h3>Future Enhancements</h3>
+                    <div class="future-item">
+                        <div class="future-icon">🤖</div>
+                        <div>
+                            <strong>Deep Learning</strong>
+                            <p style="font-size: 1rem; color: #888;">Explore LSTM networks for temporal patterns</p>
+                        </div>
+                    </div>
+                    <div class="future-item">
+                        <div class="future-icon">📱</div>
+                        <div>
+                            <strong>Mobile App</strong>
+                            <p style="font-size: 1rem; color: #888;">Native iOS/Android apps for field teams</p>
+                        </div>
+                    </div>
+                    <div class="future-item">
+                        <div class="future-icon">🔄</div>
+                        <div>
+                            <strong>Auto-Retraining</strong>
+                            <p style="font-size: 1rem; color: #888;">MLOps pipeline for continuous model updates</p>
+                        </div>
+                    </div>
+                    <div class="future-item">
+                        <div class="future-icon">🎯</div>
+                        <div>
+                            <strong>Prescriptive Analytics</strong>
+                            <p style="font-size: 1rem; color: #888;">AI recommendations for optimal retention offers</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 50px;" class="animate-in delay-2">
+                <p style="font-size: 1.5rem; color: #00d4ff; font-weight: 600;">Thank You</p>
+                <p style="color: #888; margin-top: 10px;">Questions & Discussion</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-counter">
+        <span id="current">1</span> / <span id="total">8</span>
+    </div>
+
+    <div class="nav-controls">
+        <button class="nav-btn" onclick="prevSlide()">← Previous</button>
+        <button class="nav-btn" onclick="nextSlide()">Next →</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        document.getElementById('total').textContent = totalSlides;
+
+        function showSlide(n) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            document.getElementById('current').textContent = currentSlide + 1;
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        // Touch support for mobile
+        let touchStartX = 0;
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        document.addEventListener('touchend', e => {
+            const touchEndX = e.changedTouches[0].screenX;
+            if (touchStartX - touchEndX > 50) nextSlide();
+            if (touchEndX - touchStartX > 50) prevSlide();
+        });
+    </script>
+</body>
+</html>
